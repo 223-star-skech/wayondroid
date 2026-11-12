@@ -41,8 +41,11 @@ jobs:
       run: chmod +x gradlew scripts/ci/*.sh
 
     - name: Build Debug APK
-      run: ./gradlew :app:assembleDebug
-
+      run: |
+        export ANDROID_SDK_ROOT=$ANDROID_HOME
+        export ANDROID_HOME=$ANDROID_HOME
+        ./gradlew :app:assembleDebug
+        
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
