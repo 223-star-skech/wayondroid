@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
-permissions: write-all
 
 jobs:
   build:
@@ -22,8 +21,21 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    # 绕过官方损坏的插件，手动下载并配置 Android SDK
+    - name: Set up Android SDK Manually
+      run: |
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        cd $HOME/android-sdk/cmdline-tools
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip -q commandlinetools-linux-11076708_latest.zip
+        mv cmdline-tools latest
+        rm commandlinetools-linux-11076708_latest.zip
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+    - name: Accept Android SDK Licenses
+      run: |
+        yes | sdkmanager --licenses || true
 
     - name: Grant execute permission
       run: chmod +x gradlew scripts/ci/*.sh
